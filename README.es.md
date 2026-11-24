@@ -37,12 +37,13 @@ Consulta [`PEDIDO-AGENTE.md`](PEDIDO-AGENTE.md) (en portugués). Lee los dos kit
 | [`kit/4-proposta.md`](kit/4-proposta.md) (en portugués) | modelo de propuesta |
 | [`kit/5-relatorio-mensal.md`](kit/5-relatorio-mensal.md) (en portugués) | modelo del informe mensual |
 | [`kit/diagnostico.py`](kit/diagnostico.py) | genera las preguntas y marca las respuestas (puntuación de 0 a 100) |
+| [`kit/medir.py`](kit/medir.py) | hace las preguntas solo (suscripción u OpenRouter), guarda el historial, muestra la curva y las alertas; suma las visitas que llegan desde las IA |
 
 ---
 
 ## Instalación técnica
 
-Requisitos previos: Python 3.10+ (solo biblioteca estándar). No se llama a ninguna API: las preguntas se hacen manualmente en las IA.
+Requisitos previos: Python 3.10+ (solo biblioteca estándar). `diagnostico.py` no llama a ninguna IA: las preguntas se hacen a mano. `medir.py` pregunta solo con tu suscripción (Claude Code, Codex, Antigravity) y solo usa una API (OpenRouter) si se lo pides.
 
 ```bash
 git clone https://github.com/inematds/presenca-na-ia && cd presenca-na-ia
@@ -57,6 +58,37 @@ python3 -m unittest discover -s tests
 - Marca confundida: si el nombre aparece junto con una organización de `confunde_com`, sin el sitio web correcto, no cuenta como «aparece». Los nombres se comparan como palabras completas («INEMA» no coincide con «cinema»).
 - Puntuación por respuesta: aparece 40 + sitio web correcto 30 + sin confusión 20 + sin competidor 10. Devuelve 0 con el informe y 2 si el JSON es incorrecto.
 - Pruebas (12): puntuación completa, ausente, confusión y competidor, marca confundida, palabra completa, acento y mayúsculas, dominio, preguntas, informes de antes y después del ejemplo, campo faltante, respuestas vacías, `--saida`.
+- Pruebas de `medir.py` (20): sin llamar a ninguna IA ni API (respuestas simuladas y comandos falsos).
+
+## Medir sin preguntar a mano
+
+El cliente paga la mensualidad por la curva, no por la foto de un día. `kit/medir.py` reúne tres medidas:
+
+1. **Visitas provenientes de las IAs** (dato real): exporta de Analytics el CSV de «Origen de la sesión» + «Sesiones» del mes y ejecuta `python3 kit/medir.py visitas origens.csv`. Suma ChatGPT (`chatgpt.com`), Perplexity, Gemini, Copilot, Claude, Meta AI, Grok y DeepSeek. Ejemplo: `kit/exemplo-origens.csv`.
+2. **Panel del Centro de Negocios**: menciones y clics, copiados a mano en `kit/5-relatorio-mensal.md`.
+3. **Las preguntas, hechas automáticamente**: las 4 preguntas del diagnóstico, `--vezes` veces cada una (por defecto, 3, porque la respuesta cambia), con la misma puntuación que `diagnostico.py`.
+
+```bash
+python3 kit/medir.py rodar kit/cliente.json --ias claude,codex,gemini --vezes 3   # todas las semanas
+python3 kit/medir.py relatorio kit/cliente.json --saida mes.md                     # sale con 1 si hay una alerta
+python3 kit/medir.py rodar kit/exemplo-empresa.json --ias claude,codex --vezes 1 \
+  --simular kit/exemplo-simulado.json --pasta /tmp/teste                            # probar sin ninguna IA
+```
+
+| `--ias` | Cómo pregunta | Costo |
+|---|---|---|
+| `claude` | `claude -p` con búsqueda web, en una carpeta vacía, sin CLAUDE.md ni MCP | tu suscripción de Claude Code |
+| `codex` | `codex --search exec`, en una carpeta vacía | tu suscripción de Codex |
+| `gemini` | `agy -p` (Antigravity CLI) | tu suscripción de Google |
+| `openrouter:<modelo>` | API de OpenRouter, p. ej.: `openrouter:perplexity/sonar`; necesita `OPENROUTER_API_KEY` | pago por llamada |
+
+- **Salida:** `medicoes/<empresa>/AAAA-MM-DD.json` (mismo formato que el diagnóstico) y `medicoes/<empresa>/historico.csv`. Si vuelves a ejecutarlo el mismo día, reemplaza ese día.
+- **Informe:** la curva con la puntuación de cada fecha, «aparece X de N» y «sitio correcto X de N» por IA, las confusiones que quedan y las alertas (caída de 10 puntos o más, una nueva confusión, una IA que dejó de mostrar el sitio). Sale con 1 cuando hay una alerta, así el programador puede avisarte.
+- **Los fallos no cuentan en la puntuación:** el tiempo agotado, una respuesta vacía o una respuesta que dice que no pudo buscar se consideran fallos.
+- **Codex limpio:** Codex lee tu `AGENTS.md` global. Para medir sin tus instrucciones personales, inicia sesión solo para esto (`CODEX_HOME=~/.codex-medir codex login`) y ejecútalo con `MEDIR_CODEX_HOME=~/.codex-medir`.
+- **Límite honesto:** ya sea por suscripción o por API, la IA pregunta sin memoria ni ubicación y puede usar otro modelo. El número muestra la tendencia, no exactamente lo que ve cada persona. Por eso va de la mano con las visitas reales y el panel.
+- **Programar (cron, todos los lunes a las 7 h):** `0 7 * * 1 cd ~/presenca-na-ia && python3 kit/medir.py rodar kit/cliente.json && python3 kit/medir.py relatorio kit/cliente.json --saida mes.md`
+- **Prueba real (INEMA, 24/11/2026, 1 ronda por suscripción, 2 min):** puntuación 45. Codex y Gemini encontraron inema.club en 2 de 4 respuestas; Claude hizo la búsqueda y solo encontró el INEMA de Bahía (0 de 4).
 
 ## El proceso, de principio a fin
 
@@ -72,7 +104,7 @@ python3 -m unittest discover -s tests
 | 6 | Lista de verificación | pedirle al cliente lo que aparece en `kit/3-checklist-cliente.md` | 🧠 + 👤 |
 | 7 | Registro y verificación | seguir [empresa-no-chatgpt](https://github.com/inematds/empresa-no-chatgpt) (TXT en el DNS; identidad verificada por el dueño) | 🧠 + 👤 |
 | 8 | Después | repetir los pasos 3–4 con `--saida depois.md` y mostrárselo al cliente | ⚙️ |
-| 9 | Cada mes | pasos 3–4 + panel del Centro → `kit/5-relatorio-mensal.md` | 🧠 |
+| 9 | Cada semana | `python3 kit/medir.py rodar <empresa.json>` (con cron); a fin de mes `medir.py relatorio` + `medir.py visitas` + panel del Centro → `kit/5-relatorio-mensal.md` | ⚙️ + 🧠 |
 
 ## Licencia
 

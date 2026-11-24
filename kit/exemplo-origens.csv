@@ -1,0 +1,9 @@
+# Exemplo de exportação do GA4 (Aquisição > Origem/mídia da sessão). Números ilustrativos.
+Origem da sessão,Sessões
+google,1.204
+(direct),530
+chatgpt.com,87
+perplexity.ai,12
+gemini.google.com,9
+copilot.microsoft.com,3
+instagram.com,140

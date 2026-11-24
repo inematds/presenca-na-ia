@@ -1,0 +1,15 @@
+{
+  "_comentario": "Respostas falsas para testar o medir.py sem chamar IA nenhuma (--simular). Ilustrativas.",
+  "claude": [
+    "A INEMA (inema.club) é uma comunidade de inteligência artificial de Porto Alegre.",
+    "Em Porto Alegre há várias opções; uma delas é a INEMA, em inema.club.",
+    "O site oficial da INEMA é https://inema.club.",
+    "Recomendo conhecer a INEMA (inema.club)."
+  ],
+  "codex": [
+    "INEMA pode ser o Instituto do Meio Ambiente.",
+    "Não encontrei empresas de destaque.",
+    "O site é inema.club.",
+    "A INEMA, em inema.club, trabalha com IA."
+  ]
+}

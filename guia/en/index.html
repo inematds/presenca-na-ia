@@ -63,8 +63,9 @@
   .btn{display:inline-block;background:var(--fill);color:#1a1206;font-weight:600;padding:.6em 1.05em;border-radius:10px;font-family:Sora}
   .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
   nav .links a.sec{white-space:nowrap}
-  @media(max-width:1360px){nav .links a.opt{display:none}}
-  @media(max-width:860px){nav .links a.sec{display:none}}
+  @media(max-width:1900px){nav .links a.opt{display:none}}
+  @media(max-width:1360px){nav .links{gap:12px;font-size:.86rem}}
+  @media(max-width:1160px){nav .links a.sec{display:none}}
   @media(max-width:520px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
   .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
   .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(250,204,21,.18),transparent 70%);pointer-events:none}
@@ -162,12 +163,13 @@
   </span>
   <div class="links">
     <a class="sec" href="#explicado">The opportunity</a>
-    <a class="sec" href="#dia">Your day</a>
+    <a class="sec opt" href="#dia">Your day</a>
     <a class="sec" href="#como">How it works</a>
     <a class="sec" href="#comecar">How to start</a>
     <a class="sec opt" href="#base">The basis</a>
     <a class="sec opt" href="#prova">The proof</a>
     <a class="sec" href="#recomendado">Get recommended</a>
+    <a class="sec" href="#medir">Measure</a>
     <span class="lang"><a href="../">PT</a><a class="on" href="./">EN</a><a href="../es/">ES</a></span>
     <button class="tgl" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">🌙</button>
     <a class="btn" href="https://github.com/inematds/presenca-na-ia" target="_blank" rel="noopener">GitHub</a>
@@ -308,6 +310,28 @@ Do not access any accounts, change DNS settings, or send anything to anyone unle
     <div class="card"><h3>4. The method: inemaSEO</h3><p><a href="https://inematds.github.io/inemaseo-metodo/guia/en/" target="_blank" rel="noopener">inemaSEO</a> covers this layer: <strong>SEO</strong> (Google and Bing), <strong>GEO</strong> (getting cited by AI), <strong>AEO</strong> (pages that answer questions), and <strong>WebMCP</strong> (a site ready for AI agents), with scripts for Search Console, Bing, and IndexNow. To study it step by step: <a href="https://inematds.github.io/formacao-inemaseo-fundacao-v72/" target="_blank" rel="noopener">inemaSEO Training</a>.</p></div>
   </div>
   <p class="fonte">Identity verification belongs to the owner: don’t claim the client’s profile with your ChatGPT account. Source: <a href="https://help.openai.com/en/articles/20001635-setting-up-your-business-on-chatgpt" target="_blank" rel="noopener">Setting up your business on ChatGPT</a> (OpenAI).</p>
+</div></section>
+
+<section id="medir"><div class="wrap">
+  <span class="chip">Measure</span>
+  <h2>Measure without asking by hand every week: <span class="amb">that’s what turns it into a monthly subscription</span></h2>
+  <p class="sub">Clients don’t pay a monthly fee for the listing. They pay to see the curve rise month after month and to be alerted when an AI starts replacing the business with another one again. Combine three measures, from most to least reliable.</p>
+  <div class="grid g3">
+    <div class="card"><h3>1. Visits coming from AI</h3><p>Real, free data. ChatGPT tags the links it shows with <code>utm_source=chatgpt.com</code>. In the client’s Google Analytics, under Acquisition › Session source, you’ll see <em>chatgpt.com</em>, <em>perplexity.ai</em>, <em>gemini.google.com</em> and <em>copilot.microsoft.com</em>. Export the month’s CSV, and the kit adds up visits by AI.</p></div>
+    <div class="card"><h3>2. The Business Center dashboard</h3><p>The dashboard itself shows mentions, website clicks and the topics where the business appears. It only covers ChatGPT and only shows numbers when there are enough conversations. It takes two minutes a month: copy the data into the report.</p></div>
+    <div class="card"><h3>3. Questions asked automatically</h3><p><code>medir.py</code> asks AIs the 4 diagnostic questions, 3 times each (the answers change from one run to another), applies the same score and saves the history. It uses <strong>your subscription</strong> to Claude Code, Codex or Gemini (Antigravity), without an API key. OpenRouter is optional.</p></div>
+  </div>
+  <div class="pedido" style="margin-top:20px">
+<p class="mut" style="font-size:.9rem">Every week (you can set it up in a scheduler like cron):</p>
+<pre style="white-space:pre-wrap">python3 kit/medir.py rodar kit/cliente.json --ias claude,codex,gemini --vezes 3
+python3 kit/medir.py relatorio kit/cliente.json --saida mes.md   # exits 1 when there is an alert
+python3 kit/medir.py visitas origens-do-mes.csv                  # CSV exported from Analytics</pre>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><h3>📈 What the report shows</h3><p>The score curve for each measurement, how many times the business appeared in each AI (“2 of 4”) and what name it’s still being confused with. It also warns when the score drops by 10 points or more, when a new mix-up appears and when an AI stops showing the right website.</p></div>
+    <div class="card"><h3>🧪 We tested with INEMA on 11/24/2026</h3><p>12 questions using a subscription, in 2 minutes: score 45. Codex and Gemini found inema.club in 2 of 4 answers; Claude searched and only found the INEMA in Bahia (0 of 4). That’s our measured “before.” This is the kind of finding you take to a client.</p></div>
+  </div>
+  <p class="fonte">Measurement through a subscription or API is not the consumer’s ChatGPT: it asks without memory or location and may use a different model. It shows the trend, not exactly what each person sees. That’s why it works alongside real visits and the dashboard. Anyone who also uses Codex day to day should use a separate login for measurement (<code>CODEX_HOME=~/.codex-medir codex login</code>), or their personal instructions will affect the answer. Details in the <a href="https://github.com/inematds/presenca-na-ia#measure-without-asking-by-hand" target="_blank" rel="noopener">README</a>.</p>
 </div></section>
 
 <section id="faq"><div class="wrap">

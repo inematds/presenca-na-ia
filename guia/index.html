@@ -63,8 +63,9 @@
   .btn{display:inline-block;background:var(--fill);color:#1a1206;font-weight:600;padding:.6em 1.05em;border-radius:10px;font-family:Sora}
   .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
   nav .links a.sec{white-space:nowrap}
-  @media(max-width:1360px){nav .links a.opt{display:none}}
-  @media(max-width:860px){nav .links a.sec{display:none}}
+  @media(max-width:1900px){nav .links a.opt{display:none}}
+  @media(max-width:1360px){nav .links{gap:12px;font-size:.86rem}}
+  @media(max-width:1160px){nav .links a.sec{display:none}}
   @media(max-width:520px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
   .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
   .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(250,204,21,.18),transparent 70%);pointer-events:none}
@@ -162,12 +163,13 @@
   </span>
   <div class="links">
     <a class="sec" href="#explicado">O ganho</a>
-    <a class="sec" href="#dia">No seu dia</a>
+    <a class="sec opt" href="#dia">No seu dia</a>
     <a class="sec" href="#como">Como funciona</a>
     <a class="sec" href="#comecar">Como começar</a>
     <a class="sec opt" href="#base">Base</a>
     <a class="sec opt" href="#prova">A prova</a>
     <a class="sec" href="#recomendado">Ser recomendado</a>
+    <a class="sec" href="#medir">Medir</a>
     <span class="lang"><a class="on" href="./">PT</a><a href="en/">EN</a><a href="es/">ES</a></span>
     <button class="tgl" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">🌙</button>
     <a class="btn" href="https://github.com/inematds/presenca-na-ia" target="_blank" rel="noopener">GitHub</a>
@@ -308,6 +310,29 @@ Não acesse nenhuma conta, não mude DNS e não envie nada a ninguém sem eu diz
     <div class="card"><h3>4. O método: inemaSEO</h3><p>O <a href="https://inematds.github.io/inemaseo-metodo/guia/" target="_blank" rel="noopener">inemaSEO</a> cobre essa camada: <strong>SEO</strong> (Google e Bing), <strong>GEO</strong> (ser citado pelas IAs), <strong>AEO</strong> (páginas que respondem a pergunta) e <strong>WebMCP</strong> (o site pronto para agentes de IA), com scripts para Search Console, Bing e IndexNow. Para estudar passo a passo: <a href="https://inematds.github.io/formacao-inemaseo-fundacao-v72/" target="_blank" rel="noopener">Formação inemaSEO</a>.</p></div>
   </div>
   <p class="fonte">A verificação de identidade é do dono: não reivindique o perfil do cliente com a sua conta do ChatGPT. Fonte: <a href="https://help.openai.com/en/articles/20001635-setting-up-your-business-on-chatgpt" target="_blank" rel="noopener">Setting up your business on ChatGPT</a> (OpenAI).</p>
+</div></section>
+
+<section id="medir"><div class="wrap">
+  <span class="chip">Medir</span>
+  <h2>Medir sem perguntar à mão toda semana: <span class="amb">é isso que vira mensalidade</span></h2>
+  <p class="sub">O <strong>medir.py</strong> do kit faz as perguntas sozinho toda semana e avisa você quando algo piora. O cliente não paga a mensalidade pelo cadastro: paga para ver a curva subindo mês a mês e para saber na hora quando uma IA volta a trocar a empresa por outra. Junte três medidas, da mais confiável para a menos.</p>
+  <div class="grid g3">
+    <div class="card"><h3>1. Visitas que chegam das IAs</h3><p>Dado real e grátis. O ChatGPT marca os links que mostra com <code>utm_source=chatgpt.com</code>. No Google Analytics do cliente, em Aquisição › Origem da sessão, aparecem <em>chatgpt.com</em>, <em>perplexity.ai</em>, <em>gemini.google.com</em> e <em>copilot.microsoft.com</em>. Exporte o CSV do mês e o kit soma as visitas por IA.</p></div>
+    <div class="card"><h3>2. O painel da Central de Negócios</h3><p>O próprio painel mostra menções, cliques no site e os temas em que a empresa aparece. Só cobre o ChatGPT e só mostra números quando há conversas suficientes. São dois minutos por mês: copie para o relatório.</p></div>
+    <div class="card"><h3>3. As perguntas, feitas sozinhas</h3><p>O <code>medir.py</code> faz as 4 perguntas do diagnóstico às IAs, 3 vezes cada (a resposta muda de uma vez para outra), aplica a mesma nota e guarda o histórico. Usa a <strong>sua assinatura</strong> do Claude Code, do Codex ou do Gemini (Antigravity), sem chave de API. O OpenRouter é opcional.</p></div>
+  </div>
+  <div class="pedido" style="margin-top:20px">
+<p class="mut" style="font-size:.9rem">Os três comandos (o primeiro, toda semana):</p>
+<pre style="white-space:pre-wrap">python3 kit/medir.py rodar kit/cliente.json --ias claude,codex,gemini --vezes 3
+python3 kit/medir.py relatorio kit/cliente.json --saida mes.md   # sai 1 quando há alerta
+python3 kit/medir.py visitas origens-do-mes.csv                  # CSV exportado do Analytics</pre>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>⏰ Deixar rodando sozinho toda segunda</h3><p>Num computador ou servidor que fica ligado, abra o agendador com <code>crontab -e</code> e cole as 4 linhas que estão no <a href="https://github.com/inematds/presenca-na-ia#medir-sem-perguntar-à-mão" target="_blank" rel="noopener">README</a>, trocando <code>VOCE</code> pelo seu usuário. Elas já dizem ao agendador onde estão o Claude, o Codex e o Gemini, guardam cada semana em <code>relatorios/AAAA-MM-DD.md</code> e mandam um e-mail só quando há alerta ou quando uma IA não respondeu. Confira na primeira segunda-feira se o arquivo apareceu.</p><p><strong>Custo:</strong> 36 perguntas com busca por cliente por semana (3 IAs × 4 perguntas × 3 vezes), uns 5 a 10 minutos, dentro da sua assinatura. Com muitos clientes, espalhe os dias para não bater no limite de uso.</p></div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><h3>📈 O que o relatório mostra</h3><p>A curva com a nota de cada medição, geral e por IA, quantas vezes a empresa apareceu em cada IA (com 3 rodadas, "9 de 12") e com que nome ela ainda é confundida. Também avisa quando a nota cai, de uma vez ou aos poucos, quando surge uma confusão nova, quando uma IA para de mostrar o site certo e quando uma IA não respondeu (login vencido ou limite de uso).</p></div>
+    <div class="card"><h3>🧪 Testamos com a INEMA em 24/11/2026</h3><p>Com 1 rodada, 12 perguntas pela assinatura em 2 minutos: nota 45. O Codex e o Gemini acharam o inema.club em 2 de 4 respostas; o Claude pesquisou e só achou o INEMA da Bahia (0 de 4). Esse é o nosso "antes" medido. É o tipo de achado que você leva ao cliente.</p></div>
+  </div>
+  <p class="fonte">Nenhuma das três IAs da medição é o ChatGPT, que é onde o cliente se cadastrou (o Codex é da OpenAI, mas não é o ChatGPT). O ChatGPT só é medido pelo painel e pelas visitas. E a medição pela assinatura ou pela API pergunta sem memória nem localização e pode usar outro modelo. Mostra a tendência, não exatamente o que cada pessoa vê. Por isso ela anda junto com as visitas reais e o painel. Quem também usa o Codex no dia a dia deve fazer um login só para medir (<code>CODEX_HOME=~/.codex-medir codex login</code>), senão as suas instruções pessoais entram na resposta. Detalhes no <a href="https://github.com/inematds/presenca-na-ia#medir-sem-perguntar-à-mão" target="_blank" rel="noopener">README</a>.</p>
 </div></section>
 
 <section id="faq"><div class="wrap">
