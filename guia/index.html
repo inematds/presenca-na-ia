@@ -66,7 +66,7 @@
   @media(max-width:1900px){nav .links a.opt{display:none}}
   @media(max-width:1360px){nav .links{gap:12px;font-size:.86rem}}
   @media(max-width:1160px){nav .links a.sec{display:none}}
-  @media(max-width:520px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
+  @media(max-width:720px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
   .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
   .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(250,204,21,.18),transparent 70%);pointer-events:none}
   .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:74px 22px}
@@ -86,6 +86,12 @@
   @media(max-width:820px){.g3,.g4{grid-template-columns:1fr 1fr}}
   @media(max-width:540px){.g2,.g3,.g4{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+  .tabwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tabia{width:100%;border-collapse:collapse;font-size:.88rem;min-width:620px}
+  .tabia th,.tabia td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .tabia th{color:var(--amb);font-weight:600;white-space:nowrap}
+  .tabia td.n{white-space:nowrap}
+  .tabia tr.fora td{color:var(--mut)}
   .card h3{font-size:1.05rem;margin-bottom:.4em}
   .card p{color:var(--mut);font-size:.95rem;margin:0}
   .card p+p{margin-top:.6em}
@@ -327,12 +333,29 @@ Não acesse nenhuma conta, não mude DNS e não envie nada a ninguém sem eu diz
 python3 kit/medir.py relatorio kit/cliente.json --saida mes.md   # sai 1 quando há alerta
 python3 kit/medir.py visitas origens-do-mes.csv                  # CSV exportado do Analytics</pre>
   </div>
-  <div class="card" style="margin-top:16px"><h3>⏰ Deixar rodando sozinho toda segunda</h3><p>Num computador ou servidor que fica ligado, abra o agendador com <code>crontab -e</code> e cole as 4 linhas que estão no <a href="https://github.com/inematds/presenca-na-ia#medir-sem-perguntar-à-mão" target="_blank" rel="noopener">README</a>, trocando <code>VOCE</code> pelo seu usuário. Elas já dizem ao agendador onde estão o Claude, o Codex e o Gemini, guardam cada semana em <code>relatorios/AAAA-MM-DD.md</code> e mandam um e-mail só quando há alerta ou quando uma IA não respondeu. Confira na primeira segunda-feira se o arquivo apareceu.</p><p><strong>Custo:</strong> 36 perguntas com busca por cliente por semana (3 IAs × 4 perguntas × 3 vezes), uns 5 a 10 minutos, dentro da sua assinatura. Com muitos clientes, espalhe os dias para não bater no limite de uso.</p></div>
+  <div class="card" style="margin-top:16px"><h3>⏰ Deixar rodando sozinho toda segunda</h3><p>Num computador ou servidor que fica ligado, abra o agendador com <code>crontab -e</code> e cole as 4 linhas que estão no <a href="https://github.com/inematds/presenca-na-ia#medir-sem-perguntar-à-mão" target="_blank" rel="noopener">README</a>, trocando <code>VOCE</code> pelo seu usuário. Antes, rode <code>which claude codex agy python3</code> e ponha na linha <code>PATH</code> as pastas que aparecerem; sem isso o agendador não acha as IAs. Cada semana fica em <code>relatorios/AAAA-MM-DD.md</code>. O aviso por e-mail (<code>MAILTO</code>) só chega se a máquina tiver um servidor de e-mail configurado, o que computador pessoal e VPS comum quase nunca têm. Sem ele, abra o relatório toda segunda ou peça ao Claude Code para trocar o aviso por uma mensagem no Telegram. O <code>crontab</code> existe no Linux e no macOS; no Windows, instale o WSL (o Linux dentro do Windows) e faça o mesmo lá. Confira na primeira segunda-feira se o arquivo apareceu.</p><p><strong>Custo:</strong> 36 perguntas com busca por cliente por semana (3 IAs × 4 perguntas × 3 vezes), uns 5 a 10 minutos, dentro da sua assinatura. Com muitos clientes, espalhe os dias para não bater no limite de uso.</p></div>
+  <div class="card" style="margin-top:16px" id="medir-ias"><h3>🤖 Em quais IAs dá para medir</h3>
+<p>Três pela sua assinatura, sem custo extra, e quatro pelo OpenRouter, que é pago por pergunta e pede a chave em <code>OPENROUTER_API_KEY</code>. Todas pesquisam na internet antes de responder. A última coluna é a INEMA na primeira medição, em 24/11/2026.</p>
+<div class="tabwrap"><table class="tabia">
+<tr><th>IA</th><th>Como o medir.py pergunta</th><th>Custo</th><th>INEMA em 24/11</th></tr>
+<tr><td>Claude</td><td>assinatura: <code>claude</code></td><td class="n">na assinatura</td><td class="n">20 (0 de 12)</td></tr>
+<tr><td>Codex (OpenAI)</td><td>assinatura: <code>codex</code></td><td class="n">na assinatura</td><td>não respondeu (limite de uso)</td></tr>
+<tr><td>Gemini</td><td>assinatura: <code>gemini</code> (Antigravity)</td><td class="n">na assinatura</td><td class="n">49 (5 de 12)</td></tr>
+<tr><td>Perplexity</td><td><code>openrouter:perplexity/sonar</code> (a busca já vem junto)</td><td class="n">centavos</td><td>35 (1 de 4, sem o site)</td></tr>
+<tr><td>DeepSeek</td><td><code>openrouter:deepseek/deepseek-v4.1-flash:online</code></td><td class="n">centavos</td><td class="n">38 (1 de 4)</td></tr>
+<tr><td>GLM (Z.ai)</td><td><code>openrouter:z-ai/glm-5.3:online</code></td><td class="n">centavos</td><td class="n">20 (0 de 4)</td></tr>
+<tr><td>OpenAI, perto do ChatGPT</td><td><code>openrouter:openai/gpt-6.2-sol:online</code></td><td class="n">centavos</td><td class="n">20 (0 de 4)</td></tr>
+<tr class="fora"><td>ChatGPT</td><td>não dá: o ChatGPT não tem linha de comando e automatizar o site quebra fácil. Ele é medido pelo painel e pelas visitas</td><td>—</td><td>—</td></tr>
+<tr class="fora"><td>Manus</td><td>fica de fora: cada pergunta vira uma tarefa de agente de vários minutos que gasta créditos</td><td>—</td><td>—</td></tr>
+</table></div>
+<p><strong>Custo medido:</strong> as 16 perguntas pelo OpenRouter (4 IAs × 4 perguntas) custaram US$ 0,02. Com 3 rodadas são 48 por semana, uns US$ 0,06 por cliente. O <code>:online</code> no fim do nome liga a busca na internet; sem ele, o DeepSeek e o GLM respondem só de memória.</p>
+<pre style="white-space:pre-wrap">python3 kit/medir.py rodar kit/cliente.json --vezes 3 \
+  --ias claude,codex,gemini,openrouter:perplexity/sonar,openrouter:deepseek/deepseek-v4.1-flash:online,openrouter:z-ai/glm-5.3:online,openrouter:openai/gpt-6.2-sol:online</pre></div>
   <div class="grid g2" style="margin-top:16px">
     <div class="card"><h3>📈 O que o relatório mostra</h3><p>A curva com a nota de cada medição, geral e por IA, quantas vezes a empresa apareceu em cada IA (com 3 rodadas, "9 de 12") e com que nome ela ainda é confundida. Também avisa quando a nota cai, de uma vez ou aos poucos, quando surge uma confusão nova, quando uma IA para de mostrar o site certo e quando uma IA não respondeu (login vencido ou limite de uso).</p></div>
-    <div class="card"><h3>🧪 Testamos com a INEMA em 24/11/2026</h3><p>Com 1 rodada, 12 perguntas pela assinatura em 2 minutos: nota 45. O Codex e o Gemini acharam o inema.club em 2 de 4 respostas; o Claude pesquisou e só achou o INEMA da Bahia (0 de 4). Esse é o nosso "antes" medido. É o tipo de achado que você leva ao cliente.</p></div>
+    <div class="card"><h3>🧪 Testamos com a INEMA em 24/11/2026</h3><p>É a medição da tabela acima: Claude e Gemini com 3 rodadas pela assinatura, as quatro do OpenRouter com 1 rodada (US$ 0,02). O Codex não respondeu porque estava no limite de uso. Nota geral 32: só o Gemini achou o inema.club com frequência (5 de 12), e as IAs ainda confundem a INEMA com o Instituto do Meio Ambiente. Esse é o nosso "antes" medido. É o tipo de achado que você leva ao cliente.</p></div>
   </div>
-  <p class="fonte">Nenhuma das três IAs da medição é o ChatGPT, que é onde o cliente se cadastrou (o Codex é da OpenAI, mas não é o ChatGPT). O ChatGPT só é medido pelo painel e pelas visitas. E a medição pela assinatura ou pela API pergunta sem memória nem localização e pode usar outro modelo. Mostra a tendência, não exatamente o que cada pessoa vê. Por isso ela anda junto com as visitas reais e o painel. Quem também usa o Codex no dia a dia deve fazer um login só para medir (<code>CODEX_HOME=~/.codex-medir codex login</code>), senão as suas instruções pessoais entram na resposta. Detalhes no <a href="https://github.com/inematds/presenca-na-ia#medir-sem-perguntar-à-mão" target="_blank" rel="noopener">README</a>.</p>
+  <p class="fonte">Nenhuma das IAs da medição é o ChatGPT, que é onde o cliente se cadastrou (o Codex e o gpt-6.2-sol são da OpenAI, mas não são o ChatGPT). O ChatGPT só é medido pelo painel e pelas visitas. E a medição pela assinatura ou pela API pergunta sem memória nem localização e pode usar outro modelo. Mostra a tendência, não exatamente o que cada pessoa vê. Por isso ela anda junto com as visitas reais e o painel. Quem também usa o Codex no dia a dia deve fazer um login só para medir (<code>CODEX_HOME=~/.codex-medir codex login</code>), senão as suas instruções pessoais entram na resposta. Detalhes no <a href="https://github.com/inematds/presenca-na-ia#medir-sem-perguntar-à-mão" target="_blank" rel="noopener">README</a>.</p>
 </div></section>
 
 <section id="faq"><div class="wrap">

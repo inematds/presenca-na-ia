@@ -221,6 +221,14 @@ def nota_ias(dia: dict, ias) -> float | None:
     return sum(notas) / len(notas) if notas else None
 
 
+def rotulo(ia: str) -> str:
+    """Nome curto para o relatório: 'openrouter:z-ai/glm-5.3:online' -> 'glm-5.3 (OpenRouter)'."""
+    if not ia.startswith("openrouter:"):
+        return ia
+    m = ia[11:].split(":")[0].split("/")[-1]
+    return f"{m} (OpenRouter)"
+
+
 def mudas(dia: dict) -> list[str]:
     """IAs que foram perguntadas e não deram nenhuma resposta válida."""
     return [ia for ia in dia["tentadas"] if ia not in dia["por_ia"]]
@@ -232,7 +240,7 @@ def alertas(anteriores: list[dict], atual: dict) -> list[str]:
     if atual["ok"] == 0:
         return ["Nenhuma resposta nesta medição: confira login, limite de uso e PATH das IAs."]
     for ia in mudas(atual):
-        avisos.append(f"{ia} não respondeu nesta medição (login, limite de uso ou PATH); ficou fora da nota.")
+        avisos.append(f"{rotulo(ia)} não respondeu nesta medição (login, limite de uso ou PATH); ficou fora da nota.")
     validas = [a for a in anteriores if a["ok"]]
     if not validas:
         return avisos
@@ -243,8 +251,9 @@ def alertas(anteriores: list[dict], atual: dict) -> list[str]:
         avisos.append(f"A nota caiu de {round(n_ant)} para {round(n_at)} (mesmas IAs).")
     else:
         janela = validas[-4:]  # queda lenta: compara com a média das últimas 4 medições
-        base = [n for a in janela if (n := nota_ias(a, set(a["por_ia"]) & set(atual["por_ia"]))) is not None]
-        n_at2 = nota_ias(atual, set(atual["por_ia"]))
+        comuns_janela = set(atual["por_ia"]).intersection(*(set(a["por_ia"]) for a in janela))
+        base = [n for a in janela if (n := nota_ias(a, comuns_janela)) is not None]
+        n_at2 = nota_ias(atual, comuns_janela)
         if len(base) >= 2 and n_at2 is not None and n_at2 <= sum(base) / len(base) - 10:
             avisos.append(f"Queda lenta: a nota ({round(n_at2)}) está 10 pontos ou mais abaixo da média "
                           f"das últimas {len(base)} medições ({round(sum(base) / len(base))}).")
@@ -254,7 +263,7 @@ def alertas(anteriores: list[dict], atual: dict) -> list[str]:
     for ia, x in atual["por_ia"].items():
         a = ant["por_ia"].get(ia)
         if a and a["site"] > 0 and x["site"] == 0:
-            avisos.append(f"{ia} parou de mostrar o site certo.")
+            avisos.append(f"{rotulo(ia)} parou de mostrar o site certo.")
     return avisos
 
 
@@ -265,7 +274,7 @@ def relatorio(emp: dict, hist: list[dict]) -> tuple[str, list[str]]:
     dias = {dd: resumo_dia([r for r in hist if r["data"] == dd]) for dd in datas}
     todas = sorted({r["ia"] for r in hist})
     out = [f"# Medição Presença na IA — {emp['nome']}", "",
-           "## A curva", "", "| Data | Nota | " + " | ".join(todas) + " | Respostas | Falhas | |",
+           "## A curva", "", "| Data | Nota | " + " | ".join(rotulo(i) for i in todas) + " | Respostas | Falhas | |",
            "|---|---|" + "---|" * len(todas) + "---|---|---|"]
     for dd in datas:
         x = dias[dd]
@@ -280,10 +289,10 @@ def relatorio(emp: dict, hist: list[dict]) -> tuple[str, list[str]]:
     out += ["", f"## Última medição ({datas[-1]})", "",
             "| IA | Aparece | Site certo | Nota |", "|---|---|---|---|"]
     for ia, x in sorted(ult["por_ia"].items()):
-        out.append(f"| {ia} | {x['aparece']} de {x['n']} | {x['site']} de {x['n']} | "
+        out.append(f"| {rotulo(ia)} | {x['aparece']} de {x['n']} | {x['site']} de {x['n']} | "
                    f"{round(sum(x['notas']) / len(x['notas']))} |")
     for ia in mudas(ult):
-        out.append(f"| {ia} | sem resposta | — | — |")
+        out.append(f"| {rotulo(ia)} | sem resposta | — | — |")
     if ult["confusoes"]:
         out += ["", "**Ainda confunde com:** " + ", ".join(ult["confusoes"])]
     avisos = alertas([dias[dd] for dd in datas[:-1]], ult)
@@ -312,9 +321,9 @@ def visitas(arq: str) -> str:
     if not linhas:
         raise ErroUso("CSV vazio")
     cab = [d.norm(c) for c in linhas[0]]
-    col_o = next((i for i, c in enumerate(cab) if "origem" in c or "source" in c or "referr" in c), None)
+    col_o = next((i for i, c in enumerate(cab) if "origem" in c or "origen" in c or "source" in c or "referr" in c), None)
     col_s = None
-    for chave in ("sess", "visit", "users", "usuarios"):  # sessões primeiro: o GA4 põe Usuários antes
+    for chave in ("sess", "sesi", "visit", "users", "usuarios"):  # sessões primeiro: o GA4 põe Usuários antes
         col_s = next((i for i, c in enumerate(cab) if i != col_o and chave in c), None)
         if col_s is not None:
             break

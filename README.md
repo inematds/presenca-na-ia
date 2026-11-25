@@ -58,7 +58,7 @@ python3 -m unittest discover -s tests
 - Marca trocada: nome citado junto com uma organização de `confunde_com`, sem o site certo, não conta como "aparece". Nomes são comparados como palavra inteira ("INEMA" não casa com "cinema").
 - Nota de cada resposta: aparece 40 + site certo 30 + sem confusão 20 + sem concorrente 10. Sai 0 com o relatório, 2 com JSON errado.
 - Testes (12): nota cheia, ausente, confusão e concorrente, marca trocada, palavra inteira, acento e caixa, domínio, perguntas, relatório antes e depois do exemplo, campo faltando, respostas vazias, `--saida`.
-- Testes do `medir.py` (20): sem chamar IA nem API (respostas simuladas e comandos falsos).
+- Testes do `medir.py` (29): sem chamar IA nem API (respostas simuladas e comandos falsos).
 
 ## Medir sem perguntar à mão
 
@@ -94,11 +94,12 @@ python3 kit/medir.py rodar kit/exemplo-empresa.json --ias claude,codex --vezes 1
 PATH=/usr/local/bin:/usr/bin:/bin:/home/VOCE/.local/bin:/home/VOCE/.npm-global/bin
 MEDIR_CODEX_HOME=/home/VOCE/.codex-medir
 MAILTO=voce@exemplo.com
-0 7 * * 1 cd /home/VOCE/presenca-na-ia && mkdir -p relatorios && python3 kit/medir.py rodar kit/cliente.json >/dev/null; python3 kit/medir.py relatorio kit/cliente.json --saida relatorios/$(date +\%F).md >/dev/null || echo "Presença na IA: alerta ou falha, veja relatorios/"
+0 7 * * 1 cd /home/VOCE/presenca-na-ia && mkdir -p relatorios && python3 kit/medir.py rodar kit/cliente.json >/dev/null 2>&1; python3 kit/medir.py relatorio kit/cliente.json --saida relatorios/$(date +\%F).md >/dev/null || echo "Presença na IA: alerta ou falha, veja relatorios/"
 ```
 
-  Cada semana fica num arquivo `relatorios/AAAA-MM-DD.md`. O cron só escreve alguma coisa quando há alerta ou quando uma IA não respondeu, e o `MAILTO` manda isso para o seu e-mail (se a máquina não envia e-mail, troque o `echo` pelo seu aviso, como uma mensagem no Telegram). Sem login de medição do Codex, apague a linha `MEDIR_CODEX_HOME`. Confira na primeira segunda-feira se o arquivo apareceu.
-- **Teste real (INEMA, 24/11/2026, `--vezes 1` pela assinatura, 2 min):** nota 45. Codex e Gemini acharam o inema.club em 2 de 4 respostas; o Claude pesquisou e só achou o INEMA da Bahia (0 de 4).
+  Cada semana fica num arquivo `relatorios/AAAA-MM-DD.md`. O cron só escreve alguma coisa quando há alerta ou quando uma IA não respondeu, e o `MAILTO` manda isso para o seu e-mail. Isso só funciona se a máquina tiver servidor de e-mail configurado, o que computador pessoal e VPS comum quase nunca têm. Sem ele, abra o relatório toda segunda ou peça ao Claude Code para trocar o `echo` por uma mensagem no Telegram. Sem login de medição do Codex, apague a linha `MEDIR_CODEX_HOME`. Para medir também pelo OpenRouter, acrescente a linha `OPENROUTER_API_KEY=sua-chave` e passe `--ias claude,codex,gemini,openrouter:perplexity/sonar,...` no `rodar`. O cron existe no Linux e no macOS; no Windows, use o WSL (o Linux dentro do Windows). Confira na primeira segunda-feira se o arquivo apareceu.
+- **Pelo OpenRouter, testados:** `openrouter:perplexity/sonar` (busca própria), `openrouter:deepseek/deepseek-v4.1-flash:online`, `openrouter:z-ai/glm-5.3:online` e `openrouter:openai/gpt-6.2-sol:online` (o mais perto do ChatGPT). O `:online` liga a busca na internet; sem ele o modelo responde só de memória. Custo medido: 16 perguntas = US$ 0,02. O ChatGPT fica de fora porque não tem linha de comando, e o Manus porque cada pergunta vira uma tarefa de agente de minutos que gasta créditos.
+- **Primeira medição (INEMA, 24/11/2026):** nota geral 32. Pela assinatura, com 3 rodadas: Claude 20 (0 de 12), Gemini 49 (5 de 12), Codex no limite de uso. Pelo OpenRouter, com 1 rodada: Perplexity 35, DeepSeek 38, GLM 20, OpenAI 20. Ainda confunde com o Instituto do Meio Ambiente.
 
 ## O processo, do início ao fim
 

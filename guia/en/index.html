@@ -66,7 +66,7 @@
   @media(max-width:1900px){nav .links a.opt{display:none}}
   @media(max-width:1360px){nav .links{gap:12px;font-size:.86rem}}
   @media(max-width:1160px){nav .links a.sec{display:none}}
-  @media(max-width:520px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
+  @media(max-width:720px){nav .wrap{gap:8px;padding:8px 14px;height:auto;flex-wrap:wrap} nav .links{gap:8px;margin-left:0;width:100%;justify-content:space-between} nav .btn{padding:.45em .7em;font-size:.82rem} .tgl{width:34px;height:34px}}
   .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
   .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(250,204,21,.18),transparent 70%);pointer-events:none}
   .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:74px 22px}
@@ -86,6 +86,12 @@
   @media(max-width:820px){.g3,.g4{grid-template-columns:1fr 1fr}}
   @media(max-width:540px){.g2,.g3,.g4{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+  .tabwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tabia{width:100%;border-collapse:collapse;font-size:.88rem;min-width:620px}
+  .tabia th,.tabia td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .tabia th{color:var(--amb);font-weight:600;white-space:nowrap}
+  .tabia td.n{white-space:nowrap}
+  .tabia tr.fora td{color:var(--mut)}
   .card h3{font-size:1.05rem;margin-bottom:.4em}
   .card p{color:var(--mut);font-size:.95rem;margin:0}
   .card p+p{margin-top:.6em}
@@ -314,24 +320,42 @@ Do not access any accounts, change DNS settings, or send anything to anyone unle
 
 <section id="medir"><div class="wrap">
   <span class="chip">Measure</span>
-  <h2>Measure without asking by hand every week: <span class="amb">that’s what turns it into a monthly subscription</span></h2>
-  <p class="sub">Clients don’t pay a monthly fee for the listing. They pay to see the curve rise month after month and to be alerted when an AI starts replacing the business with another one again. Combine three measures, from most to least reliable.</p>
+  <h2>Measure without asking by hand every week: <span class="amb">that is what turns into a monthly fee</span></h2>
+  <p class="sub">The kit's <strong>medir.py</strong> asks the questions on its own every week and warns you when something gets worse. The client doesn't pay the monthly fee for the sign-up: they pay to watch the curve climb month after month and to know right away when an AI goes back to swapping their company for another one. Combine three measures, from the most reliable to the least.</p>
   <div class="grid g3">
-    <div class="card"><h3>1. Visits coming from AI</h3><p>Real, free data. ChatGPT tags the links it shows with <code>utm_source=chatgpt.com</code>. In the client’s Google Analytics, under Acquisition › Session source, you’ll see <em>chatgpt.com</em>, <em>perplexity.ai</em>, <em>gemini.google.com</em> and <em>copilot.microsoft.com</em>. Export the month’s CSV, and the kit adds up visits by AI.</p></div>
-    <div class="card"><h3>2. The Business Center dashboard</h3><p>The dashboard itself shows mentions, website clicks and the topics where the business appears. It only covers ChatGPT and only shows numbers when there are enough conversations. It takes two minutes a month: copy the data into the report.</p></div>
-    <div class="card"><h3>3. Questions asked automatically</h3><p><code>medir.py</code> asks AIs the 4 diagnostic questions, 3 times each (the answers change from one run to another), applies the same score and saves the history. It uses <strong>your subscription</strong> to Claude Code, Codex or Gemini (Antigravity), without an API key. OpenRouter is optional.</p></div>
+    <div class="card"><h3>1. Visits that arrive from the AIs</h3><p>Real data, and free. ChatGPT tags the links it shows with <code>utm_source=chatgpt.com</code>. In the client's Google Analytics, under Acquisition › Session source, you'll see <em>chatgpt.com</em>, <em>perplexity.ai</em>, <em>gemini.google.com</em> and <em>copilot.microsoft.com</em>. Export the month's CSV and the kit adds up the visits per AI.</p></div>
+    <div class="card"><h3>2. The Business Center dashboard</h3><p>The dashboard itself shows mentions, clicks to the site and the topics where the company appears. It only covers ChatGPT and only shows numbers when there are enough conversations. It takes two minutes a month: copy it into the report.</p></div>
+    <div class="card"><h3>3. The questions, asked automatically</h3><p><code>medir.py</code> asks the AIs the 4 diagnostic questions, 3 times each (the answer changes from one time to the next), applies the same score and keeps the history. It uses <strong>your subscription</strong> to Claude Code, Codex or Gemini (Antigravity), with no API key. OpenRouter is optional.</p></div>
   </div>
   <div class="pedido" style="margin-top:20px">
-<p class="mut" style="font-size:.9rem">Every week (you can set it up in a scheduler like cron):</p>
+<p class="mut" style="font-size:.9rem">The three commands (the first one, every week):</p>
 <pre style="white-space:pre-wrap">python3 kit/medir.py rodar kit/cliente.json --ias claude,codex,gemini --vezes 3
 python3 kit/medir.py relatorio kit/cliente.json --saida mes.md   # exits 1 when there is an alert
 python3 kit/medir.py visitas origens-do-mes.csv                  # CSV exported from Analytics</pre>
   </div>
+  <div class="card" style="margin-top:16px"><h3>⏰ Leave it running on its own every Monday</h3><p>On a computer or server that stays on, open the scheduler with <code>crontab -e</code> and paste the 4 lines found in the <a href="https://github.com/inematds/presenca-na-ia#measure-without-asking-by-hand" target="_blank" rel="noopener">README</a>, replacing <code>VOCE</code> with your username. First, run <code>which claude codex agy python3</code> and put the folders that appear on the <code>PATH</code> line; without that the scheduler can't find the AIs. Each week is saved in <code>relatorios/AAAA-MM-DD.md</code>. The email alert (<code>MAILTO</code>) only arrives if the machine has a mail server configured, which a personal computer or an ordinary VPS almost never has. Without it, open the report every Monday or ask Claude Code to swap the alert for a Telegram message. <code>crontab</code> exists on Linux and macOS; on Windows, install WSL (Linux inside Windows) and do the same there. Check on the first Monday that the file showed up.</p><p><strong>Cost:</strong> 36 questions with search per client per week (3 AIs × 4 questions × 3 times), about 5 to 10 minutes, within your subscription. With many clients, spread the days out so you don't hit the usage limit.</p></div>
+  <div class="card" style="margin-top:16px" id="medir-ias"><h3>🤖 Which AIs can be measured</h3>
+<p>Three through your subscription, at no extra cost, and four through OpenRouter, which is paid per question and requires the key in <code>OPENROUTER_API_KEY</code>. All of them search the internet before answering. The last column is INEMA in the first measurement, on Nov 24, 2026.</p>
+<div class="tabwrap"><table class="tabia">
+<tr><th>AI</th><th>How medir.py asks</th><th>Cost</th><th>INEMA on Nov 24</th></tr>
+<tr><td>Claude</td><td>subscription: <code>claude</code></td><td class="n">in the subscription</td><td class="n">20 (0 of 12)</td></tr>
+<tr><td>Codex (OpenAI)</td><td>subscription: <code>codex</code></td><td class="n">in the subscription</td><td>did not answer (usage limit)</td></tr>
+<tr><td>Gemini</td><td>subscription: <code>gemini</code> (Antigravity)</td><td class="n">in the subscription</td><td class="n">49 (5 of 12)</td></tr>
+<tr><td>Perplexity</td><td><code>openrouter:perplexity/sonar</code> (search is already included)</td><td class="n">cents</td><td>35 (1 of 4, without the site)</td></tr>
+<tr><td>DeepSeek</td><td><code>openrouter:deepseek/deepseek-v4.1-flash:online</code></td><td class="n">cents</td><td class="n">38 (1 of 4)</td></tr>
+<tr><td>GLM (Z.ai)</td><td><code>openrouter:z-ai/glm-5.3:online</code></td><td class="n">cents</td><td class="n">20 (0 of 4)</td></tr>
+<tr><td>OpenAI, close to ChatGPT</td><td><code>openrouter:openai/gpt-6.2-sol:online</code></td><td class="n">cents</td><td class="n">20 (0 of 4)</td></tr>
+<tr class="fora"><td>ChatGPT</td><td>not possible: ChatGPT has no command line and automating the website breaks easily. It is measured through the dashboard and the visits</td><td>—</td><td>—</td></tr>
+<tr class="fora"><td>Manus</td><td>left out: each question becomes an agent task lasting several minutes that spends credits</td><td>—</td><td>—</td></tr>
+</table></div>
+<p><strong>Measured cost:</strong> the 16 questions through OpenRouter (4 AIs × 4 questions) cost US$ 0.02. With 3 rounds that is 48 per week, about US$ 0.06 per client. The <code>:online</code> at the end of the name turns on internet search; without it, DeepSeek and GLM answer from memory only.</p>
+<pre style="white-space:pre-wrap">python3 kit/medir.py rodar kit/cliente.json --vezes 3 \
+  --ias claude,codex,gemini,openrouter:perplexity/sonar,openrouter:deepseek/deepseek-v4.1-flash:online,openrouter:z-ai/glm-5.3:online,openrouter:openai/gpt-6.2-sol:online</pre></div>
   <div class="grid g2" style="margin-top:16px">
-    <div class="card"><h3>📈 What the report shows</h3><p>The score curve for each measurement, how many times the business appeared in each AI (“2 of 4”) and what name it’s still being confused with. It also warns when the score drops by 10 points or more, when a new mix-up appears and when an AI stops showing the right website.</p></div>
-    <div class="card"><h3>🧪 We tested with INEMA on 11/24/2026</h3><p>12 questions using a subscription, in 2 minutes: score 45. Codex and Gemini found inema.club in 2 of 4 answers; Claude searched and only found the INEMA in Bahia (0 of 4). That’s our measured “before.” This is the kind of finding you take to a client.</p></div>
+    <div class="card"><h3>📈 What the report shows</h3><p>The curve with the score of each measurement, overall and per AI, how many times the company appeared in each AI (with 3 rounds, "9 of 12") and what name it is still confused with. It also warns you when the score drops, suddenly or gradually, when a new mix-up appears, when an AI stops showing the right site and when an AI did not answer (expired login or usage limit).</p></div>
+    <div class="card"><h3>🧪 We tested it with INEMA on Nov 24, 2026</h3><p>It is the measurement in the table above: Claude and Gemini with 3 rounds through the subscription, the four OpenRouter ones with 1 round (US$ 0.02). Codex did not answer because it was at its usage limit. Overall score 32: only Gemini found inema.club often (5 of 12), and the AIs still confuse INEMA with the Instituto do Meio Ambiente (the Environment Institute). That is our measured "before". It is the kind of finding you take to the client.</p></div>
   </div>
-  <p class="fonte">Measurement through a subscription or API is not the consumer’s ChatGPT: it asks without memory or location and may use a different model. It shows the trend, not exactly what each person sees. That’s why it works alongside real visits and the dashboard. Anyone who also uses Codex day to day should use a separate login for measurement (<code>CODEX_HOME=~/.codex-medir codex login</code>), or their personal instructions will affect the answer. Details in the <a href="https://github.com/inematds/presenca-na-ia#measure-without-asking-by-hand" target="_blank" rel="noopener">README</a>.</p>
+  <p class="fonte">None of the AIs in the measurement is ChatGPT, which is where the client signed up (Codex and gpt-6.2-sol are from OpenAI, but they are not ChatGPT). ChatGPT is only measured through the dashboard and the visits. And measuring through the subscription or the API asks without memory or location and may use a different model. It shows the trend, not exactly what each person sees. That is why it goes together with the real visits and the dashboard. If you also use Codex day to day, make a separate login just for measuring (<code>CODEX_HOME=~/.codex-medir codex login</code>), otherwise your personal instructions end up in the answer. Details in the <a href="https://github.com/inematds/presenca-na-ia#measure-without-asking-by-hand" target="_blank" rel="noopener">README</a>.</p>
 </div></section>
 
 <section id="faq"><div class="wrap">

@@ -58,15 +58,15 @@ python3 -m unittest discover -s tests
 - Misidentified brand: a name mentioned alongside an organization in `confunde_com`, without the correct website, does not count as “appearing.” Names are compared as whole words (“INEMA” does not match “cinema”).
 - Score per answer: appears 40 + correct website 30 + no confusion 20 + no competitor 10. Exits with 0 for the report, 2 for invalid JSON.
 - Tests (12): full score, missing, confusion and competitor, misidentified brand, whole word, accents and case, domain, questions, before and after sample reports, missing field, empty answers, `--saida`.
-- `medir.py` tests (20): no AI or API calls (simulated answers and fake commands).
+- `medir.py` tests (29): no AI or API calls (simulated answers and fake commands).
 
 ## Measure without asking by hand
 
-Clients pay the monthly fee for the trend, not a snapshot of one day. `kit/medir.py` combines three measurements:
+The client pays the monthly fee for the curve, not for a one-day snapshot. `kit/medir.py` combines three measurements:
 
-1. **Visits from AI tools** (real data): export the Analytics CSV with “Session source” + “Sessions” for the month, then run `python3 kit/medir.py visitas origens.csv`. It totals ChatGPT (`chatgpt.com`), Perplexity, Gemini, Copilot, Claude, Meta AI, Grok, and DeepSeek. Example: `kit/exemplo-origens.csv`.
+1. **Visits coming from the AIs** (real data): export the month's "Session source" + "Sessions" CSV from Analytics and run `python3 kit/medir.py visitas origens.csv`. It adds up ChatGPT (`chatgpt.com`), Perplexity, Gemini, Copilot, Claude, Meta AI, Grok and DeepSeek. Example: `kit/exemplo-origens.csv`.
 2. **Business Directory dashboard**: mentions and clicks, copied by hand into `kit/5-relatorio-mensal.md`.
-3. **Questions, asked automatically**: each of the 4 diagnostic questions, `--vezes` times each (default 3, because answers can vary), using the same scoring as `diagnostico.py`.
+3. **The questions, asked automatically**: the 4 diagnostic questions, `--vezes` times each (default 3, because the answer changes), with the same score as `diagnostico.py`.
 
 ```bash
 python3 kit/medir.py rodar kit/cliente.json --ias claude,codex,gemini --vezes 3   # every week
@@ -77,18 +77,29 @@ python3 kit/medir.py rodar kit/exemplo-empresa.json --ias claude,codex --vezes 1
 
 | `--ias` | How it asks | Cost |
 |---|---|---|
-| `claude` | `claude -p` with web search, in an empty folder, without CLAUDE.md or MCP | Your Claude Code subscription |
-| `codex` | `codex --search exec`, in an empty folder | Your Codex subscription |
-| `gemini` | `agy -p` (Antigravity CLI) | Your Google subscription |
-| `openrouter:<modelo>` | OpenRouter API, e.g.: `openrouter:perplexity/sonar`; requires `OPENROUTER_API_KEY` | Pay per call |
+| `claude` | `claude -p` with web search, in an empty folder, with no CLAUDE.md or MCP | your Claude Code subscription |
+| `codex` | `codex --search exec`, in an empty folder | your Codex subscription |
+| `gemini` | `agy -p` (Antigravity CLI) | your Google subscription |
+| `openrouter:<modelo>` | OpenRouter API, e.g. `openrouter:perplexity/sonar`; needs `OPENROUTER_API_KEY` | paid per call |
 
-- **Output:** `medicoes/<empresa>/AAAA-MM-DD.json` (same format as the diagnostic) and `medicoes/<empresa>/historico.csv`. Running it again on the same day replaces that day’s data.
-- **Report:** the trend with the score for each date, “appears X of N” and “correct site X of N” for each AI, remaining confusions, and alerts (a drop of 10 points or more, a new confusion, or an AI that stopped showing the site). Exits with 1 when there is an alert, so the scheduler can notify you.
-- **Failures don’t count toward the score:** timeouts, empty responses, or responses saying the search could not be completed are counted as failures.
-- **Clean Codex:** Codex reads your global `AGENTS.md`. To measure without your personal instructions, log in just for this purpose (`CODEX_HOME=~/.codex-medir codex login`) and run with `MEDIR_CODEX_HOME=~/.codex-medir`.
-- **Honest limitation:** whether using a subscription or the API, the AI asks without memory or location and may use a different model. The number shows the trend, not exactly what each person sees. That’s why it’s paired with real visits and the dashboard.
-- **Schedule (cron, every Monday at 7 a.m.):** `0 7 * * 1 cd ~/presenca-na-ia && python3 kit/medir.py rodar kit/cliente.json && python3 kit/medir.py relatorio kit/cliente.json --saida mes.md`
-- **Real test (INEMA, 11/24/2026, 1 subscription run, 2 min):** score 45. Codex and Gemini found inema.club in 2 of 4 responses; Claude searched and found only the INEMA in Bahia (0 of 4).
+- **Output:** `medicoes/<empresa>/AAAA-MM-DD.json` (same format as the diagnostic) and `medicoes/<empresa>/historico.csv`. Running again on the same day replaces that day.
+- **Report:** the curve with the overall score and each AI's score by date, "appears X of N" and "right site X of N" per AI (with `--vezes 3` that is 12 answers per AI), the confusions that remain, and the alerts. Alerts: a drop of 10 points or more against the previous measurement, with the same AIs; a slow decline (10 points below the average of the last 4); a new confusion; an AI that stopped showing the site; an AI that did not respond; a measurement with no answers at all. It exits with 1 when there is an alert, so the scheduler can notify you.
+- **Failures do not count toward the score:** a timeout, an empty answer, or an answer saying it could not search counts as a failure. If an AI gives no valid answer at all (expired login, usage limit, command not in the PATH), `rodar` exits with 1 and the report warns about it. The week's score compares only the AIs that responded in both measurements.
+- **Clean Codex:** Codex reads your global `AGENTS.md`. To measure without your personal instructions, create a login just for this (`CODEX_HOME=~/.codex-medir codex login`) and run with `MEDIR_CODEX_HOME=~/.codex-medir`.
+- **Honest limit:** none of the options asks ChatGPT, which is where the client registered. Codex is from OpenAI, but it is not ChatGPT. ChatGPT is measured only by the Directory dashboard and by visits with origin `chatgpt.com`. And through the subscription or the API, the AI asks without memory or location and may use a different model: the number shows the trend, not exactly what each person sees.
+- **Cost:** 3 AIs × 4 questions × 3 times = 36 questions with web search per client, per week (about 5 to 10 minutes). With many clients this weighs on the subscription's usage limit: spread the clients across different days or times, or use `--vezes 2`.
+- **Schedule (cron, every Monday at 7 am).** Cron does not see the folders where `claude`, `codex` and `agy` usually live. Run `which claude codex agy python3`, replace `VOCE` with your username and put the folders that show up in the `PATH`. Open it with `crontab -e` and paste:
+
+```cron
+PATH=/usr/local/bin:/usr/bin:/bin:/home/VOCE/.local/bin:/home/VOCE/.npm-global/bin
+MEDIR_CODEX_HOME=/home/VOCE/.codex-medir
+MAILTO=voce@exemplo.com
+0 7 * * 1 cd /home/VOCE/presenca-na-ia && mkdir -p relatorios && python3 kit/medir.py rodar kit/cliente.json >/dev/null 2>&1; python3 kit/medir.py relatorio kit/cliente.json --saida relatorios/$(date +\%F).md >/dev/null || echo "Presence in AI: alert or failure, see relatorios/"
+```
+
+  Each week gets its own file `relatorios/AAAA-MM-DD.md`. Cron only writes anything when there is an alert or when an AI did not respond, and `MAILTO` sends that to your email. This only works if the machine has a mail server configured, which personal computers and ordinary VPSs almost never have. Without one, open the report every Monday or ask Claude Code to replace the `echo` with a Telegram message. Without a Codex measurement login, delete the `MEDIR_CODEX_HOME` line. To also measure through OpenRouter, add the line `OPENROUTER_API_KEY=sua-chave` and pass `--ias claude,codex,gemini,openrouter:perplexity/sonar,...` to `rodar`. Cron exists on Linux and macOS; on Windows, use WSL (Linux inside Windows). On the first Monday, check that the file showed up.
+- **Through OpenRouter, tested:** `openrouter:perplexity/sonar` (its own search), `openrouter:deepseek/deepseek-v4.1-flash:online`, `openrouter:z-ai/glm-5.3:online` and `openrouter:openai/gpt-6.2-sol:online` (the closest to ChatGPT). `:online` turns on internet search; without it the model answers from memory only. Measured cost: 16 questions = US$ 0.02. ChatGPT is left out because it has no command line, and Manus because each question becomes an agent task lasting minutes that spends credits.
+- **First measurement (INEMA, 11/24/2026):** overall score 32. Through the subscription, with 3 rounds: Claude 20 (0 of 12), Gemini 49 (5 of 12), Codex at the usage limit. Through OpenRouter, with 1 round: Perplexity 35, DeepSeek 38, GLM 20, OpenAI 20. It still gets confused with the Instituto do Meio Ambiente (the Environment Institute).
 
 ## The process, from start to finish
 

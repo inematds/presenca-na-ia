@@ -162,6 +162,25 @@ class TestHistorico(unittest.TestCase):
         self.assertFalse(any("caiu" in a for a in avisos), avisos)
         self.assertTrue(any("Queda lenta" in a for a in avisos), avisos)
 
+    def test_queda_lenta_com_mistura_diferente_nao_inventa_piora(self):
+        casos = [
+            [{"claude": [BOA]}, {"claude": [BOA]},
+             {"claude": [BOA], "codex": ["Não conheço essa empresa."]}],
+            [{"claude": [BOA], "codex": [BOA]}, {"claude": [BOA]},
+             {"claude": [BOA], "codex": []}],
+            [{"claude": [BOA]}, {"codex": [BOA]},
+             {"gemini": ["Não conheço essa empresa."]}],
+        ]
+        for caso in casos:
+            with self.subTest(ias=[list(dia) for dia in caso]):
+                dias = []
+                for por_ia in caso:
+                    coletas = m.coletar(EMP, list(por_ia), 1, 1, por_ia)
+                    linhas = [m.linha_csv("2026-11-24", EMP, c) for c in coletas]
+                    dias.append(m.resumo_dia(linhas))
+                avisos = m.alertas(dias[:-1], dias[-1])
+                self.assertFalse(any("Queda lenta" in a for a in avisos), avisos)
+
     def test_historico_vazio(self):
         with self.assertRaises(m.ErroUso):
             m.relatorio(EMP, [])
@@ -181,6 +200,14 @@ class TestVisitas(unittest.TestCase):
         t = m.visitas(f.name)
         self.assertIn("| ChatGPT | 87 |", t)
         self.assertIn("do total de 1291", t)
+
+    def test_ga4_em_espanhol(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8", newline="") as f:
+            csv.writer(f).writerows([["Origen de la sesión", "Usuarios", "Sesiones"],
+                                     ["perplexity.ai", "5", "9"], ["google", "100", "120"]])
+        t = m.visitas(f.name)
+        self.assertIn("| Perplexity | 9 |", t)
+        self.assertIn("do total de 129", t)
 
     def test_numero(self):
         self.assertEqual(m.numero("87.0"), 87)

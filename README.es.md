@@ -58,37 +58,48 @@ python3 -m unittest discover -s tests
 - Marca confundida: si el nombre aparece junto con una organización de `confunde_com`, sin el sitio web correcto, no cuenta como «aparece». Los nombres se comparan como palabras completas («INEMA» no coincide con «cinema»).
 - Puntuación por respuesta: aparece 40 + sitio web correcto 30 + sin confusión 20 + sin competidor 10. Devuelve 0 con el informe y 2 si el JSON es incorrecto.
 - Pruebas (12): puntuación completa, ausente, confusión y competidor, marca confundida, palabra completa, acento y mayúsculas, dominio, preguntas, informes de antes y después del ejemplo, campo faltante, respuestas vacías, `--saida`.
-- Pruebas de `medir.py` (20): sin llamar a ninguna IA ni API (respuestas simuladas y comandos falsos).
+- Pruebas de `medir.py` (29): sin llamar a ninguna IA ni API (respuestas simuladas y comandos falsos).
 
 ## Medir sin preguntar a mano
 
-El cliente paga la mensualidad por la curva, no por la foto de un día. `kit/medir.py` reúne tres medidas:
+El cliente paga la mensualidad por la curva, no por la foto de un día. El `kit/medir.py` junta tres medidas:
 
-1. **Visitas provenientes de las IAs** (dato real): exporta de Analytics el CSV de «Origen de la sesión» + «Sesiones» del mes y ejecuta `python3 kit/medir.py visitas origens.csv`. Suma ChatGPT (`chatgpt.com`), Perplexity, Gemini, Copilot, Claude, Meta AI, Grok y DeepSeek. Ejemplo: `kit/exemplo-origens.csv`.
-2. **Panel del Centro de Negocios**: menciones y clics, copiados a mano en `kit/5-relatorio-mensal.md`.
-3. **Las preguntas, hechas automáticamente**: las 4 preguntas del diagnóstico, `--vezes` veces cada una (por defecto, 3, porque la respuesta cambia), con la misma puntuación que `diagnostico.py`.
+1. **Visitas que llegan desde las IAs** (dato real): exporte de Analytics el CSV de "Origen de la sesión" + "Sesiones" del mes y ejecute `python3 kit/medir.py visitas origens.csv`. Él suma ChatGPT (`chatgpt.com`), Perplexity, Gemini, Copilot, Claude, Meta AI, Grok y DeepSeek. Ejemplo: `kit/exemplo-origens.csv`.
+2. **Panel del Centro de Negocios**: menciones y clics, copiados a mano al `kit/5-relatorio-mensal.md`.
+3. **Las preguntas, hechas solas**: las 4 preguntas del diagnóstico, `--vezes` veces cada una (por defecto 3, porque la respuesta cambia), con la misma nota de `diagnostico.py`.
 
 ```bash
-python3 kit/medir.py rodar kit/cliente.json --ias claude,codex,gemini --vezes 3   # todas las semanas
-python3 kit/medir.py relatorio kit/cliente.json --saida mes.md                     # sale con 1 si hay una alerta
+python3 kit/medir.py rodar kit/cliente.json --ias claude,codex,gemini --vezes 3   # cada semana
+python3 kit/medir.py relatorio kit/cliente.json --saida mes.md                     # sale 1 si hay alerta
 python3 kit/medir.py rodar kit/exemplo-empresa.json --ias claude,codex --vezes 1 \
   --simular kit/exemplo-simulado.json --pasta /tmp/teste                            # probar sin ninguna IA
 ```
 
 | `--ias` | Cómo pregunta | Costo |
 |---|---|---|
-| `claude` | `claude -p` con búsqueda web, en una carpeta vacía, sin CLAUDE.md ni MCP | tu suscripción de Claude Code |
-| `codex` | `codex --search exec`, en una carpeta vacía | tu suscripción de Codex |
-| `gemini` | `agy -p` (Antigravity CLI) | tu suscripción de Google |
-| `openrouter:<modelo>` | API de OpenRouter, p. ej.: `openrouter:perplexity/sonar`; necesita `OPENROUTER_API_KEY` | pago por llamada |
+| `claude` | `claude -p` con búsqueda en la web, en una carpeta vacía, sin CLAUDE.md ni MCP | su suscripción de Claude Code |
+| `codex` | `codex --search exec`, en una carpeta vacía | su suscripción de Codex |
+| `gemini` | `agy -p` (Antigravity CLI) | su suscripción de Google |
+| `openrouter:<modelo>` | API de OpenRouter, ej.: `openrouter:perplexity/sonar`; necesita `OPENROUTER_API_KEY` | se paga por llamada |
 
-- **Salida:** `medicoes/<empresa>/AAAA-MM-DD.json` (mismo formato que el diagnóstico) y `medicoes/<empresa>/historico.csv`. Si vuelves a ejecutarlo el mismo día, reemplaza ese día.
-- **Informe:** la curva con la puntuación de cada fecha, «aparece X de N» y «sitio correcto X de N» por IA, las confusiones que quedan y las alertas (caída de 10 puntos o más, una nueva confusión, una IA que dejó de mostrar el sitio). Sale con 1 cuando hay una alerta, así el programador puede avisarte.
-- **Los fallos no cuentan en la puntuación:** el tiempo agotado, una respuesta vacía o una respuesta que dice que no pudo buscar se consideran fallos.
-- **Codex limpio:** Codex lee tu `AGENTS.md` global. Para medir sin tus instrucciones personales, inicia sesión solo para esto (`CODEX_HOME=~/.codex-medir codex login`) y ejecútalo con `MEDIR_CODEX_HOME=~/.codex-medir`.
-- **Límite honesto:** ya sea por suscripción o por API, la IA pregunta sin memoria ni ubicación y puede usar otro modelo. El número muestra la tendencia, no exactamente lo que ve cada persona. Por eso va de la mano con las visitas reales y el panel.
-- **Programar (cron, todos los lunes a las 7 h):** `0 7 * * 1 cd ~/presenca-na-ia && python3 kit/medir.py rodar kit/cliente.json && python3 kit/medir.py relatorio kit/cliente.json --saida mes.md`
-- **Prueba real (INEMA, 24/11/2026, 1 ronda por suscripción, 2 min):** puntuación 45. Codex y Gemini encontraron inema.club en 2 de 4 respuestas; Claude hizo la búsqueda y solo encontró el INEMA de Bahía (0 de 4).
+- **Salida:** `medicoes/<empresa>/AAAA-MM-DD.json` (mismo formato del diagnóstico) y `medicoes/<empresa>/historico.csv`. Ejecutar de nuevo el mismo día reemplaza el día.
+- **Informe:** la curva con la nota general y la de cada IA por fecha, "aparece X de N" y "sitio correcto X de N" por IA (con `--vezes 3` son 12 respuestas por IA), las confusiones que quedan y las alertas. Alertas: caída de 10 puntos o más frente a la medición anterior, con las mismas IAs; caída lenta (10 puntos por debajo del promedio de las últimas 4); confusión nueva; IA que dejó de mostrar el sitio; IA que no respondió; medición sin ninguna respuesta. Sale con 1 cuando hay alerta, así el programador de tareas puede avisarle.
+- **Las fallas no cuentan en la nota:** tiempo agotado, respuesta vacía o respuesta que dice que no pudo buscar se vuelven falla. Si una IA no da ninguna respuesta válida (sesión vencida, límite de uso, comando fuera del PATH), el `rodar` sale con 1 y el informe avisa. La nota de la semana compara solo las IAs que respondieron en las dos mediciones.
+- **Codex limpio:** Codex lee su `AGENTS.md` global. Para medir sin sus instrucciones personales, haga un login solo para esto (`CODEX_HOME=~/.codex-medir codex login`) y ejecute con `MEDIR_CODEX_HOME=~/.codex-medir`.
+- **Límite honesto:** ninguna de las opciones le pregunta a ChatGPT, que es donde el cliente se registró. Codex es de OpenAI, pero no es ChatGPT. ChatGPT solo se mide por el panel del Centro y por las visitas con origen `chatgpt.com`. Y, ya sea por suscripción o por API, la IA pregunta sin memoria ni ubicación y puede usar otro modelo: el número muestra la tendencia, no exactamente lo que ve cada persona.
+- **Costo:** 3 IAs × 4 preguntas × 3 veces = 36 preguntas con búsqueda en la web por cliente, por semana (unos 5 a 10 minutos). Con muchos clientes esto pesa en el límite de uso de la suscripción: reparta los clientes en días u horarios distintos, o use `--vezes 2`.
+- **Programar (cron, todos los lunes a las 7 h).** El cron no ve las carpetas donde suelen estar `claude`, `codex` y `agy`. Ejecute `which claude codex agy python3`, cambie `VOCE` por su usuario y ponga en el `PATH` las carpetas que aparezcan. Abra con `crontab -e` y pegue:
+
+```cron
+PATH=/usr/local/bin:/usr/bin:/bin:/home/VOCE/.local/bin:/home/VOCE/.npm-global/bin
+MEDIR_CODEX_HOME=/home/VOCE/.codex-medir
+MAILTO=voce@exemplo.com
+0 7 * * 1 cd /home/VOCE/presenca-na-ia && mkdir -p relatorios && python3 kit/medir.py rodar kit/cliente.json >/dev/null 2>&1; python3 kit/medir.py relatorio kit/cliente.json --saida relatorios/$(date +\%F).md >/dev/null || echo "Presencia en la IA: alerta o falla, vea relatorios/"
+```
+
+  Cada semana queda en un archivo `relatorios/AAAA-MM-DD.md`. El cron solo escribe algo cuando hay alerta o cuando una IA no respondió, y el `MAILTO` envía eso a su correo. Esto solo funciona si la máquina tiene un servidor de correo configurado, algo que una computadora personal y un VPS común casi nunca tienen. Sin él, abra el informe todos los lunes o pida a Claude Code que cambie el `echo` por un mensaje en Telegram. Sin login de medición de Codex, borre la línea `MEDIR_CODEX_HOME`. Para medir también por OpenRouter, agregue la línea `OPENROUTER_API_KEY=sua-chave` y pase `--ias claude,codex,gemini,openrouter:perplexity/sonar,...` en el `rodar`. El cron existe en Linux y macOS; en Windows, use WSL (el Linux dentro de Windows). Verifique el primer lunes si apareció el archivo.
+- **Por OpenRouter, probados:** `openrouter:perplexity/sonar` (búsqueda propia), `openrouter:deepseek/deepseek-v4.1-flash:online`, `openrouter:z-ai/glm-5.3:online` y `openrouter:openai/gpt-6.2-sol:online` (el más cercano a ChatGPT). El `:online` activa la búsqueda en internet; sin él el modelo responde solo de memoria. Costo medido: 16 preguntas = US$ 0,02. ChatGPT queda fuera porque no tiene línea de comandos, y Manus porque cada pregunta se vuelve una tarea de agente de minutos que gasta créditos.
+- **Primera medición (INEMA, 24/11/2026):** nota general 32. Por suscripción, con 3 rondas: Claude 20 (0 de 12), Gemini 49 (5 de 12), Codex en el límite de uso. Por OpenRouter, con 1 ronda: Perplexity 35, DeepSeek 38, GLM 20, OpenAI 20. Todavía lo confunde con el Instituto do Meio Ambiente.
 
 ## El proceso, de principio a fin
 
